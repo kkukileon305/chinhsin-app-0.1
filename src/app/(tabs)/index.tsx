@@ -3,6 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, RefreshContr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import { HanjaWritingModal } from '@/components/HanjaWritingModal';
 
 type Vocab = {
   id: number;
@@ -28,6 +29,19 @@ const WordbookScreen = () => {
   
   const flatListRef = useRef<FlatList>(null);
   const userIdRef = useRef<string | null>(null);
+
+  // Writing Modal States
+  const [writingVisible, setWritingVisible] = useState(false);
+  const [writingWord, setWritingWord] = useState('');
+  const [writingZhuyin, setWritingZhuyin] = useState('');
+  const [writingMeaning, setWritingMeaning] = useState('');
+
+  const handleOpenWriting = (word: string, zhuyin: string, meaning: string) => {
+    setWritingWord(word);
+    setWritingZhuyin(zhuyin);
+    setWritingMeaning(meaning);
+    setWritingVisible(true);
+  };
 
   const fetchTotalCount = async () => {
     const { count, error } = await supabase
@@ -264,9 +278,17 @@ const WordbookScreen = () => {
       <View className="bg-white dark:bg-neutral-800 p-5 rounded-2xl mb-4 shadow-sm border border-neutral-100 dark:border-neutral-700">
         <View className="flex-row justify-between items-start mb-2">
           <View className="flex-1">
-            <Text className="text-3xl font-bold text-neutral-900 dark:text-white mb-1">
-              {item.word}
-            </Text>
+            <View className="flex-row items-center mb-1">
+              <Text className="text-3xl font-bold text-neutral-900 dark:text-white mr-2">
+                {item.word}
+              </Text>
+              <TouchableOpacity
+                onPress={() => handleOpenWriting(item.word, item.zhuyin, item.meaning)}
+                className="p-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-lg active:opacity-60"
+              >
+                <Ionicons name="pencil-outline" size={14} color="#208AEF" />
+              </TouchableOpacity>
+            </View>
             <Text className="text-lg text-blue-500 font-medium mb-1">
               {item.zhuyin}
             </Text>
@@ -380,6 +402,12 @@ const WordbookScreen = () => {
           <Ionicons name="chevron-forward" size={20} color={currentPageDisplay >= totalPages ? '#9CA3AF' : '#208AEF'} />
         </TouchableOpacity>
       </View>
+
+      <HanjaWritingModal
+        visible={writingVisible}
+        targetWord={writingWord}
+        onClose={() => setWritingVisible(false)}
+      />
     </SafeAreaView>
   );
 };

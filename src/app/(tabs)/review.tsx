@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import { HanjaWritingModal } from '@/components/HanjaWritingModal';
 import { Session } from '@supabase/supabase-js';
 
 type SavedWord = {
@@ -27,11 +28,13 @@ type SavedWord = {
 const SavedWordCard = memo(({
   item,
   isExpanded,
-  onPress
+  onPress,
+  onWritePress
 }: {
   item: SavedWord;
   isExpanded: boolean;
   onPress: () => void;
+  onWritePress: () => void;
 }) => {
   const word = item.word || item.master_vocab?.word || '알 수 없는 단어';
   const zhuyin = item.zhuyin || item.master_vocab?.zhuyin || '';
@@ -53,6 +56,15 @@ const SavedWordCard = memo(({
           <Text className="text-2xl font-bold text-neutral-900 dark:text-white mr-2">
             {word}
           </Text>
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              onWritePress();
+            }}
+            className="p-1.5 bg-neutral-100 dark:bg-neutral-800 rounded-lg active:opacity-60 mr-2"
+          >
+            <Ionicons name="pencil-outline" size={14} color="#208AEF" />
+          </TouchableOpacity>
           {category && !isExpanded && (
             <View className="bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
               <Text className="text-blue-600 dark:text-blue-300 text-[10px] font-semibold">
@@ -155,6 +167,19 @@ const ReviewTab = () => {
 
   const flatListRef = React.useRef<FlatList>(null);
   const dragStartYRef = React.useRef(0);
+
+  // Writing Modal States
+  const [writingVisible, setWritingVisible] = useState(false);
+  const [writingWord, setWritingWord] = useState('');
+  const [writingZhuyin, setWritingZhuyin] = useState('');
+  const [writingMeaning, setWritingMeaning] = useState('');
+
+  const handleOpenWriting = (word: string, zhuyin: string, meaning: string) => {
+    setWritingWord(word);
+    setWritingZhuyin(zhuyin);
+    setWritingMeaning(meaning);
+    setWritingVisible(true);
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -465,27 +490,46 @@ const ReviewTab = () => {
         )}
 
         {/* Word Display Area (Tap to toggle Reveal) */}
-        <Pressable
-          onPress={() => {
-            setQuizRevealStates((prev) => ({
-              ...prev,
-              [item.id]: !prev[item.id],
-            }));
-          }}
-          className="flex-1 justify-center items-center mt-10"
-        >
-          <Text className="text-8xl font-black text-white tracking-widest text-center drop-shadow-lg">
-            {displayWord}
-          </Text>
+        <View className="flex-1 justify-center items-center mt-10 w-full">
+          <View className="flex-row items-center justify-center w-full px-6">
+            <Pressable
+              onPress={() => {
+                setQuizRevealStates((prev) => ({
+                  ...prev,
+                  [item.id]: !prev[item.id],
+                }));
+              }}
+              className="flex-1 items-center justify-center"
+            >
+              <Text className="text-8xl font-black text-white tracking-widest text-center drop-shadow-lg">
+                {displayWord}
+              </Text>
+            </Pressable>
+            
+            <TouchableOpacity
+              onPress={() => handleOpenWriting(displayWord, displayZhuyin, displayMeaning)}
+              className="p-3 bg-neutral-850 border border-neutral-750 rounded-2xl active:opacity-60 shadow ml-2 z-50"
+            >
+              <Ionicons name="pencil-outline" size={24} color="#208AEF" />
+            </TouchableOpacity>
+          </View>
 
           {!isRevealed && (
-            <View className="mt-12 bg-neutral-800/60 py-3 px-6 rounded-2xl border border-neutral-700/50">
+            <Pressable
+              onPress={() => {
+                setQuizRevealStates((prev) => ({
+                  ...prev,
+                  [item.id]: !prev[item.id],
+                }));
+              }}
+              className="mt-12 bg-neutral-800/60 py-3 px-6 rounded-2xl border border-neutral-700/50"
+            >
               <Text className="text-sm font-semibold text-neutral-400 animate-pulse text-center">
                 👉 터치하면 발음과 뜻, 예문이 열립니다
               </Text>
-            </View>
+            </Pressable>
           )}
-        </Pressable>
+        </View>
 
         {/* Revealed Details Section */}
         {isRevealed && (
@@ -565,13 +609,19 @@ const ReviewTab = () => {
     );
   };
 
-  const renderItem = ({ item }: { item: SavedWord }) => (
-    <SavedWordCard
-      item={item}
-      isExpanded={expandedIds.has(item.id)}
-      onPress={() => toggleExpand(item.id)}
-    />
-  );
+  const renderItem = ({ item }: { item: SavedWord }) => {
+    const displayWord = item.word || item.master_vocab?.word || '알 수 없는 단어';
+    const displayZhuyin = item.zhuyin || item.master_vocab?.zhuyin || '';
+    const displayMeaning = item.meaning || item.master_vocab?.meaning || '';
+    return (
+      <SavedWordCard
+        item={item}
+        isExpanded={expandedIds.has(item.id)}
+        onPress={() => toggleExpand(item.id)}
+        onWritePress={() => handleOpenWriting(displayWord, displayZhuyin, displayMeaning)}
+      />
+    );
+  };
 
   const renderHeader = () => (
     <View className="mb-6 mt-2">
@@ -739,6 +789,12 @@ const ReviewTab = () => {
           </View>
         </SafeAreaView>
       </Modal>
+
+      <HanjaWritingModal
+        visible={writingVisible}
+        targetWord={writingWord}
+        onClose={() => setWritingVisible(false)}
+      />
     </SafeAreaView>
   );
 };
