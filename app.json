@@ -7,6 +7,11 @@
     "icon": "./assets/images/icon.png",
     "scheme": "chinhsin",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
     "ios": {
       "icon": "./assets/images/icon.png"
     },
