@@ -79,7 +79,7 @@ const SettingsScreen = () => {
     return (
       <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900" edges={['top']}>
         <View className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
-          <Text className="text-2xl font-bold text-neutral-900 dark:text-white">설정 (Settings)</Text>
+          <Text className="text-2xl font-bold text-neutral-900 dark:text-white">설정</Text>
         </View>
         <View className="flex-1 justify-center px-6">
           <View className="items-center mb-10">
@@ -118,7 +118,7 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900" edges={['top']}>
       <View className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
-        <Text className="text-2xl font-bold text-neutral-900 dark:text-white">설정 (Settings)</Text>
+        <Text className="text-2xl font-bold text-neutral-900 dark:text-white">설정</Text>
       </View>
       <View className="p-6">
         {/* User Profile Card */}

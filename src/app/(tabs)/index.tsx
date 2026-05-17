@@ -27,6 +27,7 @@ const WordbookScreen = () => {
   const [savedVocabIds, setSavedVocabIds] = useState<Set<number>>(new Set());
   
   const flatListRef = useRef<FlatList>(null);
+  const userIdRef = useRef<string | null>(null);
 
   const fetchTotalCount = async () => {
     const { count, error } = await supabase
@@ -170,73 +171,77 @@ const WordbookScreen = () => {
     }
   };
 
-  const loadInitialData = async () => {
-    setLoading(true);
-    
-    let currentUserId: string | null = null;
-    let initialPage = 0;
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const uid = session?.user?.id || null;
+      setUserId(uid);
+      userIdRef.current = uid;
+    });
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        currentUserId = session.user.id;
-        setUserId(currentUserId);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const uid = session?.user?.id || null;
+      setUserId(uid);
+      userIdRef.current = uid;
+    });
 
-        // Fetch User Settings if logged in
-        const { data: settingsData, error: settingsError } = await supabase
-          .from('user_settings')
-          .select('last_vocab_page')
-          .eq('user_id', currentUserId)
-          .maybeSingle();
-
-        if (settingsError) {
-          console.error('Error fetching user_settings:', settingsError);
-        } else if (settingsData?.last_vocab_page) {
-          initialPage = Math.max(0, settingsData.last_vocab_page - 1);
-        }
-      }
-    } catch (e) {
-      console.error('Error getting auth session:', e);
-    }
-
-    // Fetch Total count and Vocab
-    await fetchTotalCount();
-    await fetchVocab(initialPage, true, currentUserId);
-    
-    setLoading(false);
-  };
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
-    loadInitialData();
-  }, []);
+    const loadData = async () => {
+      let initialPage = 0;
+      const activeUid = userId;
+
+      if (activeUid) {
+        try {
+          const { data: settingsData } = await supabase
+            .from('user_settings')
+            .select('last_vocab_page')
+            .eq('user_id', activeUid)
+            .maybeSingle();
+
+          if (settingsData?.last_vocab_page) {
+            initialPage = Math.max(0, settingsData.last_vocab_page - 1);
+          }
+        } catch (e) {
+          console.error('Error fetching settings on auth change:', e);
+        }
+      }
+
+      await fetchTotalCount();
+      await fetchVocab(initialPage, true, activeUid);
+    };
+
+    loadData();
+  }, [userId]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     let initialPage = 0;
-    let currentUserId: string | null = null;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        currentUserId = session.user.id;
-        setUserId(currentUserId);
+    const sessionUid = userIdRef.current;
+    
+    if (sessionUid) {
+      try {
         const { data: settingsData } = await supabase
           .from('user_settings')
           .select('last_vocab_page')
-          .eq('user_id', currentUserId)
+          .eq('user_id', sessionUid)
           .maybeSingle();
 
         if (settingsData?.last_vocab_page) {
           initialPage = Math.max(0, settingsData.last_vocab_page - 1);
         }
-      } else {
-        setUserId(null);
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
     }
 
     await fetchTotalCount();
-    await fetchVocab(initialPage, true, currentUserId);
+    await fetchVocab(initialPage, true, sessionUid);
   };
 
   const handlePrevPage = () => {
@@ -314,7 +319,7 @@ const WordbookScreen = () => {
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900" edges={['top']}>
       <View className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
         <Text className="text-2xl font-bold text-neutral-900 dark:text-white">
-          단어장 (Wordbook)
+          단어장
         </Text>
       </View>
       
