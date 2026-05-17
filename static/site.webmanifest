@@ -1,0 +1,44 @@
+{
+  "name": "沁心 - 대만 중국어 배움의 정원",
+  "short_name": "沁心",
+  "description": "기초 발음부터 당대중문 실전 회화까지, 대만 중국어 학습 플랫폼",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#4f46e5",
+  "background_color": "#ffffff",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "강의실",
+      "url": "/lectures",
+      "description": "당대중문 강의 학습"
+    },
+    {
+      "name": "복습하기",
+      "url": "/review",
+      "description": "저장한 단어와 문장 복습"
+    },
+    {
+      "name": "사전",
+      "url": "/dictionary",
+      "description": "단어 및 문장 검색"
+    }
+  ],
+  "categories": ["education", "utilities"]
+}
