@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { Session } from '@supabase/supabase-js';
 
-export default function ReviewTab() {
+const ReviewTab = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
@@ -58,11 +58,6 @@ export default function ReviewTab() {
     }
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    await GoogleSignin.signOut();
-  };
-
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-neutral-50 dark:bg-neutral-900">
@@ -112,9 +107,6 @@ export default function ReviewTab() {
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900" edges={['top']}>
       <View className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-800 flex-row justify-between items-center">
         <Text className="text-2xl font-bold text-neutral-900 dark:text-white">복습 (Review)</Text>
-        <TouchableOpacity onPress={signOut} className="p-2">
-          <Ionicons name="log-out-outline" size={24} color="#EF4444" />
-        </TouchableOpacity>
       </View>
       <View className="flex-1 justify-center items-center px-6">
         <Ionicons name="repeat" size={64} color="#208AEF" />
@@ -127,4 +119,6 @@ export default function ReviewTab() {
       </View>
     </SafeAreaView>
   );
-}
+};
+
+export default ReviewTab;
