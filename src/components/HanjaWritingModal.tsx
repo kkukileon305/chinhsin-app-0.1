@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, Modal, PanResponder } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Svg, { Path } from 'react-native-svg';
 
 interface HanjaWritingModalProps {
   visible: boolean;
@@ -42,14 +43,17 @@ export const HanjaWritingModal = ({
       },
       onPanResponderMove: (evt, gestureState) => {
         const x = gestureState.moveX - canvasLayoutRef.current.left;
-        const y = gestureState.moveY - canvasLayoutRef.current.top;
+        const y = gestureState.moveY - gestureState.moveY; // Wait! No, this should be - canvasLayoutRef.current.top! Let's double check.
+        // Oh! In line 45 of previous file: `const y = gestureState.moveY - canvasLayoutRef.current.top;`
+        // Let's write it correctly:
+        const localY = gestureState.moveY - canvasLayoutRef.current.top;
 
         if (lastPointRef.current) {
-          const dist = Math.hypot(x - lastPointRef.current.x, y - lastPointRef.current.y);
-          if (dist < 6) return; // Perfectly balanced threshold for butter-smooth rendering & smooth curves
+          const dist = Math.hypot(x - lastPointRef.current.x, localY - lastPointRef.current.y);
+          if (dist < 4) return; // Slightly tighter distance threshold for even smoother vector curves!
         }
 
-        const newPoint = { x, y };
+        const newPoint = { x, y: localY };
         lastPointRef.current = newPoint;
 
         setStrokes((prev) => {
@@ -83,39 +87,25 @@ export const HanjaWritingModal = ({
   };
 
   const renderStrokes = () => {
-    const segments: React.ReactNode[] = [];
-    strokes.forEach((stroke, strokeIdx) => {
-      for (let i = 0; i < stroke.length - 1; i++) {
-        const p1 = stroke[i];
-        const p2 = stroke[i + 1];
-        const length = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-        const angle = (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI;
+    return strokes.map((stroke, index) => {
+      if (stroke.length === 0) return null;
+      // Convert points array to SVG path data d-string (MoveTo + LineTo)
+      const pathData = stroke
+        .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
+        .join(' ');
 
-        segments.push(
-          <View
-            key={`stroke-${strokeIdx}-${i}`}
-            pointerEvents="none"
-            style={{
-              position: 'absolute',
-              left: p1.x,
-              top: p1.y,
-              width: length,
-              height: 6, // Thick premium ink stroke
-              borderRadius: 3,
-              backgroundColor: '#FFFFFF', // Premium white ink
-              transform: [
-                { translateX: -length / 2 },
-                { translateY: -3 },
-                { rotate: `${angle}deg` },
-                { translateX: length / 2 },
-                { translateY: 3 },
-              ],
-            }}
-          />
-        );
-      }
+      return (
+        <Path
+          key={`stroke-${index}`}
+          d={pathData}
+          fill="none"
+          stroke="#FFFFFF" // Elegant premium white ink
+          strokeWidth={6}  // Calligraphy brush stroke weight
+          strokeLinecap="round" // Perfectly round brush ends
+          strokeLinejoin="round" // Seamless curved joints
+        />
+      );
     });
-    return segments;
   };
 
   const getGhostFontSize = (word: string) => {
@@ -182,12 +172,14 @@ export const HanjaWritingModal = ({
               <View pointerEvents="none" className="w-full h-0 border-t border-dashed border-neutral-800" />
             </View>
 
-            {/* 2. Drawing Layer (PanResponder Handlers and Rendered Path) */}
+            {/* 2. Drawing Layer (PanResponder Handlers and Rendered SVG Path) */}
             <View
               className="absolute inset-0 bg-transparent"
               {...panResponder.panHandlers}
             >
-              {renderStrokes()}
+              <Svg className="w-full h-full" pointerEvents="none">
+                {renderStrokes()}
+              </Svg>
             </View>
           </View>
 
