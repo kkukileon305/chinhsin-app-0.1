@@ -490,46 +490,27 @@ const ReviewTab = () => {
         )}
 
         {/* Word Display Area (Tap to toggle Reveal) */}
-        <View className="flex-1 justify-center items-center mt-10 w-full">
-          <View className="flex-row items-center justify-center w-full px-6">
-            <Pressable
-              onPress={() => {
-                setQuizRevealStates((prev) => ({
-                  ...prev,
-                  [item.id]: !prev[item.id],
-                }));
-              }}
-              className="flex-1 items-center justify-center"
-            >
-              <Text className="text-8xl font-black text-white tracking-widest text-center drop-shadow-lg">
-                {displayWord}
-              </Text>
-            </Pressable>
-            
-            <TouchableOpacity
-              onPress={() => handleOpenWriting(displayWord, displayZhuyin, displayMeaning)}
-              className="p-3 bg-neutral-850 border border-neutral-750 rounded-2xl active:opacity-60 shadow ml-2 z-50"
-            >
-              <Ionicons name="pencil-outline" size={24} color="#208AEF" />
-            </TouchableOpacity>
-          </View>
+        <Pressable
+          onPress={() => {
+            setQuizRevealStates((prev) => ({
+              ...prev,
+              [item.id]: !prev[item.id],
+            }));
+          }}
+          className="flex-1 justify-center items-center mt-10"
+        >
+          <Text className="text-8xl font-black text-white tracking-widest text-center drop-shadow-lg">
+            {displayWord}
+          </Text>
 
           {!isRevealed && (
-            <Pressable
-              onPress={() => {
-                setQuizRevealStates((prev) => ({
-                  ...prev,
-                  [item.id]: !prev[item.id],
-                }));
-              }}
-              className="mt-12 bg-neutral-800/60 py-3 px-6 rounded-2xl border border-neutral-700/50"
-            >
+            <View className="mt-12 bg-neutral-800/60 py-3 px-6 rounded-2xl border border-neutral-700/50">
               <Text className="text-sm font-semibold text-neutral-400 animate-pulse text-center">
                 👉 터치하면 발음과 뜻, 예문이 열립니다
               </Text>
-            </Pressable>
+            </View>
           )}
-        </View>
+        </Pressable>
 
         {/* Revealed Details Section */}
         {isRevealed && (

@@ -13,7 +13,8 @@
       "backgroundColor": "#FFFFFF"
     },
     "ios": {
-      "icon": "./assets/images/icon.png"
+      "icon": "./assets/images/icon.png",
+      "bundleIdentifier": "com.kkukileon305.chinhsin"
     },
     "android": {
       "adaptiveIcon": {
