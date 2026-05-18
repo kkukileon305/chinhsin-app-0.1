@@ -37,6 +37,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="dictionary"
+        options={{
+          title: '사전',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'search' : 'search-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="review"
         options={{
           title: '복습',
