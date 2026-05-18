@@ -39,18 +39,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="review"
         options={{
-          title: session ? '복습' : '로그인',
+          title: '복습',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={
-                session
-                  ? focused
-                    ? 'repeat'
-                    : 'repeat-outline'
-                  : focused
-                    ? 'person'
-                    : 'person-outline'
-              }
+              name={focused ? 'repeat' : 'repeat-outline'}
               size={24}
               color={color}
             />

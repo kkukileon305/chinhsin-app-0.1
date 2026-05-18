@@ -5,6 +5,7 @@ import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-si
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { HanjaWritingModal } from '@/components/HanjaWritingModal';
+import { registerForPushNotifications } from '@/lib/notifications';
 import { Session } from '@supabase/supabase-js';
 
 type SavedWord = {
@@ -279,6 +280,7 @@ const ReviewTab = () => {
 
     if (uid) {
       fetchSavedWordsForUser(uid, 0, true);
+      registerForPushNotifications(uid);
     }
   }, [session?.user?.id]);
 
