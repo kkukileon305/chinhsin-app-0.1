@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, RefreshControl, Alert, Modal, Pressable } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, RefreshControl, Alert, Modal, Pressable, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +27,10 @@ const WordbookScreen = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [savedVocabIds, setSavedVocabIds] = useState<Set<number>>(new Set());
   
+  // Page Input States
+  const [pageInputModalVisible, setPageInputModalVisible] = useState(false);
+  const [pageInputValue, setPageInputValue] = useState('');
+
   // Reels Mode States
   const [reelsModalVisible, setReelsModalVisible] = useState(false);
   const [reelsLoading, setReelsLoading] = useState(false);
@@ -280,6 +284,25 @@ const WordbookScreen = () => {
     if (page + 1 < totalPages && !loading) {
       fetchVocab(page + 1);
     }
+  };
+
+  // Page Input Handlers
+  const handleOpenPageInput = () => {
+    setPageInputValue((page + 1).toString());
+    setPageInputModalVisible(true);
+  };
+
+  const handlePageInputSubmit = () => {
+    const targetPageNum = parseInt(pageInputValue, 10);
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
+
+    if (isNaN(targetPageNum) || targetPageNum < 1 || targetPageNum > totalPages) {
+      Alert.alert('유효하지 않은 페이지', `1부터 ${totalPages} 사이의 페이지 번호를 입력해주세요.`);
+      return;
+    }
+
+    setPageInputModalVisible(false);
+    fetchVocab(targetPageNum - 1);
   };
 
   // Reels Mode Handlers & Helpers
@@ -579,9 +602,15 @@ const WordbookScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        <Text className="text-neutral-700 dark:text-neutral-200 font-bold text-base">
-          {currentPageDisplay} / {totalPages}
-        </Text>
+        <TouchableOpacity
+          onPress={handleOpenPageInput}
+          className="active:opacity-60 px-3 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex-row items-center border border-neutral-200 dark:border-neutral-700"
+        >
+          <Text className="text-neutral-700 dark:text-neutral-200 font-bold text-base mr-1">
+            {currentPageDisplay} / {totalPages}
+          </Text>
+          <Ionicons name="create-outline" size={14} color="#9CA3AF" />
+        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={handleNextPage}
@@ -600,6 +629,46 @@ const WordbookScreen = () => {
         targetWord={writingWord}
         onClose={() => setWritingVisible(false)}
       />
+
+      <Modal
+        visible={pageInputModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPageInputModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/60 px-6">
+          <View className="bg-white dark:bg-neutral-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-neutral-200 dark:border-neutral-700">
+            <Text className="text-xl font-bold text-neutral-900 dark:text-white mb-2">페이지 이동</Text>
+            <Text className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">
+              이동할 페이지 번호를 입력하세요.{'\n'}(범위: 1 ~ {totalPages})
+            </Text>
+
+            <TextInput
+              value={pageInputValue}
+              onChangeText={setPageInputValue}
+              keyboardType="number-pad"
+              autoFocus={true}
+              selectTextOnFocus={true}
+              className="bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-lg font-bold text-center mb-6"
+            />
+
+            <View className="flex-row space-x-3 gap-3">
+              <TouchableOpacity
+                onPress={() => setPageInputModalVisible(false)}
+                className="flex-1 py-3 bg-neutral-100 dark:bg-neutral-700 rounded-xl items-center active:opacity-80"
+              >
+                <Text className="text-base font-semibold text-neutral-600 dark:text-neutral-300">취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handlePageInputSubmit}
+                className="flex-1 py-3 bg-blue-500 rounded-xl items-center active:opacity-80"
+              >
+                <Text className="text-base font-bold text-white">이동</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={reelsModalVisible}
