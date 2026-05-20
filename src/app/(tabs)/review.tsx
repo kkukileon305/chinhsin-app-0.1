@@ -494,11 +494,14 @@ const ReviewTab = () => {
         {/* Word Display Area (Tap to toggle Reveal) */}
         <Pressable
           onPress={() => {
-            setQuizRevealStates((prev) => ({
-              ...prev,
-              [item.id]: !prev[item.id],
-            }));
+            if (!isRevealed) {
+              setQuizRevealStates((prev) => ({
+                ...prev,
+                [item.id]: true,
+              }));
+            }
           }}
+          pointerEvents={isRevealed ? 'none' : 'auto'}
           className="flex-1 justify-center items-center mt-10"
         >
           <Text className="text-8xl font-black text-white tracking-widest text-center drop-shadow-lg">
