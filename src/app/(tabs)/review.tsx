@@ -608,15 +608,7 @@ const ReviewTab = () => {
 
   const renderHeader = () => (
     <View className="mb-6 mt-2">
-      <TouchableOpacity
-        onPress={handleStartReview}
-        className="flex-row items-center justify-center bg-blue-500 dark:bg-blue-600 py-4 px-6 rounded-2xl shadow-md active:bg-blue-600 dark:active:bg-blue-700"
-      >
-        <Ionicons name="play-circle-outline" size={24} color="#FFFFFF" />
-        <Text className="text-lg font-bold text-white ml-2">복습 시작</Text>
-      </TouchableOpacity>
-      
-      <View className="flex-row items-center justify-between mt-8 mb-2">
+      <View className="flex-row items-center justify-between mt-2 mb-2">
         <Text className="text-xl font-bold text-neutral-800 dark:text-white">
           내가 틀린 단어들 ({totalCount})
         </Text>
@@ -676,6 +668,15 @@ const ReviewTab = () => {
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900" edges={['top']}>
       <View className="px-5 py-4 border-b border-neutral-200 dark:border-neutral-800 flex-row justify-between items-center">
         <Text className="text-2xl font-bold text-neutral-900 dark:text-white">복습</Text>
+        {savedWords.length > 0 && (
+          <TouchableOpacity
+            onPress={handleStartReview}
+            className="flex-row items-center bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded-xl active:bg-blue-600 dark:active:bg-blue-700"
+          >
+            <Ionicons name="play-circle-outline" size={18} color="#FFFFFF" />
+            <Text className="text-sm font-bold text-white ml-1.5">복습 시작</Text>
+          </TouchableOpacity>
+        )}
       </View>
       
       <FlatList
